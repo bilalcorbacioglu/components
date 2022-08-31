@@ -1,10 +1,11 @@
-import { TokenAmount } from '@pangolindex/sdk';
+// import { TokenAmount } from '@pangolindex/sdk';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Box, Button, Stat, Text } from 'src/components';
 import { BIG_INT_ZERO } from 'src/constants';
-import { PNG } from 'src/constants/tokens';
+import { USDC } from 'src/constants/tokens';
 import { useChainId } from 'src/hooks';
+import { useUSDCPricekHook } from 'src/hooks/multiChainsHooks';
 import { useGetEarnedAmount, useMinichefPendingRewards } from 'src/state/pstake/hooks';
 import { StakingInfo } from 'src/state/pstake/types';
 import ClaimDrawer from '../../ClaimDrawer';
@@ -22,12 +23,17 @@ const EarnedDetail = ({ stakingInfo, version }: EarnDetailProps) => {
 
   const [isClaimDrawerVisible, setShowClaimDrawer] = useState(false);
   const [isRemoveDrawerVisible, setShowRemoveDrawer] = useState(false);
+  const usdc = USDC[chainId];
 
-  const { rewardTokensAmount, rewardTokensMultiplier } = useMinichefPendingRewards(stakingInfo);
+  const { rewardTokensAmount } = useMinichefPendingRewards(stakingInfo);
 
   const isSuperFarm = (rewardTokensAmount || [])?.length > 0;
 
-  const png = PNG[chainId]; // add PNG as default reward
+  const useUSDCPrice = useUSDCPricekHook[chainId];
+  const currency0USDPrice = useUSDCPrice(stakingInfo?.rewardTokens?.[0]);
+  const rewardAmountUSDPrice: number = currency0USDPrice
+    ? Number(currency0USDPrice.toFixed()) * Number(stakingInfo?.rewardRatePerWeek?.toSignificant(4))
+    : 0;
 
   const { earnedAmount } = useGetEarnedAmount(stakingInfo?.pid as string);
 
@@ -36,11 +42,10 @@ const EarnedDetail = ({ stakingInfo, version }: EarnDetailProps) => {
   return (
     <Wrapper>
       <Box display="flex" justifyContent="space-between" alignItems="center">
-        <Text color="text1" fontSize={[24, 18]} fontWeight={500}>
+        <Text color="text1" fontSize={[28, 22]} fontWeight={700}>
           {t('dashboardPage.earned')}
         </Text>
 
-        {/* show unstak button */}
         <Button variant="primary" width="100px" height="30px" onClick={() => setShowRemoveDrawer(true)}>
           {t('removeLiquidity.remove')}
         </Button>
@@ -48,64 +53,64 @@ const EarnedDetail = ({ stakingInfo, version }: EarnDetailProps) => {
 
       <Box flex="1">
         <InnerWrapper>
-          <Box>
-            <Stat
-              title={t('dashboardPage.earned_weeklyIncome')}
-              stat={`${stakingInfo?.rewardRatePerWeek?.toSignificant(4, { groupSeparator: ',' }) ?? '-'}`}
-              titlePosition="top"
-              titleFontSize={14}
-              statFontSize={[20, 18]}
-              titleColor="text2"
-              currency={png}
-            />
+          <Box display="flex" flexDirection="row" justifyContent="center">
+            <Text textAlign={'center'} color={'text1'} fontSize={16}>
+              {t('dashboardPage.earned_accruedReward')}
+            </Text>
+          </Box>
+          <Box display={'flex'} style={{ gap: '20px' }} justifyContent={'center'} flexDirection={'row'}>
+            <Box>
+              <Stat
+                stat={`${newEarnedAmount?.toFixed(isSuperFarm ? 2 : 6) ?? '0'}`}
+                titlePosition="top"
+                statFontSize={[36, 34]}
+                statAlign="center"
+                currency={stakingInfo?.rewardTokens?.[0]}
+              />
+            </Box>
+            {isSuperFarm && (
+              <>
+                {(rewardTokensAmount || []).map((reward, index) => {
+                  // TODO: need to fix this
+                  // ---------------------------------------------------------------
+                  // ---------------------------------------------------------------
+                  // let val = 0;
+                  // const tokenMultiplier = rewardTokensMultiplier?.[index];
+                  // const currencyUSDPrice = useUSDCPrice(reward?.token);
+                  // const extraTokenWeeklyRewardRate = stakingInfo?.getExtraTokensWeeklyRewardRate?.(
+                  //   stakingInfo?.rewardRatePerWeek,
+                  //   reward?.token,
+                  //   tokenMultiplier,
+                  // ) as TokenAmount;
+                  // val += Number(currencyUSDPrice?.toFixed()) * Number(extraTokenWeeklyRewardRate?.toSignificant(4));
+                  // console.log(val);
+                  // ---------------------------------------------------------------
+                  // ---------------------------------------------------------------
+                  return (
+                    <Box key={index}>
+                      <Stat
+                        stat={`${reward?.toFixed(Math.min(2, reward.token?.decimals)) ?? '0'}`}
+                        titlePosition="top"
+                        statFontSize={[36, 34]}
+                        statAlign="center"
+                        currency={reward?.token}
+                      />
+                    </Box>
+                  );
+                })}
+              </>
+            )}
           </Box>
 
-          <Box>
-            <Stat
-              title={t('dashboardPage.earned_totalEarned')}
-              stat={`${newEarnedAmount?.toFixed(6) ?? '0'}`}
-              titlePosition="top"
-              titleFontSize={14}
-              statFontSize={[20, 18]}
-              titleColor="text2"
-              currency={png}
-            />
+          <Box pt={30}>
+            <Text color="text1" fontSize={[12, 10]} fontWeight={400} textAlign={'center'}>
+              {t('dashboardPage.earned_yourWeeklyIncome', {
+                coinSymbol: usdc?.symbol,
+                value: rewardAmountUSDPrice?.toFixed(6) ?? '-',
+              })}
+            </Text>
           </Box>
         </InnerWrapper>
-
-        {isSuperFarm && (
-          <>
-            {(rewardTokensAmount || []).map((reward, index) => {
-              const tokenMultiplier = rewardTokensMultiplier?.[index];
-
-              const extraTokenWeeklyRewardRate = stakingInfo?.getExtraTokensWeeklyRewardRate?.(
-                stakingInfo?.rewardRatePerWeek,
-                reward?.token,
-                tokenMultiplier,
-              ) as TokenAmount;
-
-              return (
-                <InnerWrapper key={index}>
-                  <Box>
-                    <Stat
-                      stat={`${extraTokenWeeklyRewardRate?.toSignificant(4, { groupSeparator: ',' }) ?? '-'} `}
-                      statFontSize={[20, 18]}
-                      currency={reward?.token}
-                    />
-                  </Box>
-
-                  <Box>
-                    <Stat
-                      stat={`${reward?.toFixed(Math.min(6, reward.token?.decimals)) ?? '0'}`}
-                      statFontSize={[20, 18]}
-                      currency={reward?.token}
-                    />
-                  </Box>
-                </InnerWrapper>
-              );
-            })}
-          </>
-        )}
       </Box>
 
       <Box mt={10}>

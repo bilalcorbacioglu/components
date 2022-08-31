@@ -590,6 +590,8 @@
     "earned_dailyIncome": "Günlük Getiri",
     "earned_weeklyIncome": "Haftalık Getiri",
     "earned_totalEarned": "Toplam Kazanılan",
+    "earned_accruedReward": "Accrued Reward",
+    "earned_yourWeeklyIncome": "Your weekly estimated {{ coinSymbol }} Income is: {{value}}",
     "earned_claim": "Talep Et",
     "earned_customizePools": "Havuzları Özelleştir",
     "followed_address": "Adres",

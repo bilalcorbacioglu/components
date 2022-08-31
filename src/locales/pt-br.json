@@ -590,6 +590,8 @@
     "earned_dailyIncome": "Daily Income",
     "earned_weeklyIncome": "Weekly Income",
     "earned_totalEarned": "Total Earned",
+    "earned_accruedReward": "Accrued Reward",
+    "earned_yourWeeklyIncome": "Your weekly estimated {{ coinSymbol }} Income is: {{value}}",
     "earned_claim": "Claim",
     "earned_customizePools": "Customize Pools",
     "followed_address": "Address",

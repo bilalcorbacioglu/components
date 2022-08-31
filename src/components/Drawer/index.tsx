@@ -1,8 +1,7 @@
-import React, { useContext } from 'react';
-import { X } from 'react-feather';
-import { ThemeContext } from 'styled-components';
+import React from 'react';
 import { Box, Text } from '../';
-import { CloseCircle, DrawerContent, DrawerRoot } from './styled';
+import CloseCircle from '../CloseCircle';
+import { DrawerContent, DrawerRoot } from './styled';
 
 interface DrawerProps {
   isOpen: boolean;
@@ -13,7 +12,6 @@ interface DrawerProps {
 }
 
 export default function Drawer({ isOpen, onClose, children, title, backgroundColor }: DrawerProps) {
-  const theme = useContext(ThemeContext);
   return (
     <DrawerRoot isOpen={isOpen} backgroundColor={backgroundColor}>
       {title && (
@@ -24,11 +22,7 @@ export default function Drawer({ isOpen, onClose, children, title, backgroundCol
         </Box>
       )}
 
-      <Box position="absolute" right={20} top={20}>
-        <CloseCircle onClick={onClose}>
-          <X color={theme.primary} size={10} />
-        </CloseCircle>
-      </Box>
+      <CloseCircle onClick={onClose} />
 
       <DrawerContent>{children}</DrawerContent>
     </DrawerRoot>
