@@ -1,4 +1,3 @@
-// import { TokenAmount } from '@pangolindex/sdk';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Box, Button, Stat, Text } from 'src/components';
@@ -10,6 +9,7 @@ import { useGetEarnedAmount, useMinichefPendingRewards } from 'src/state/pstake/
 import { StakingInfo } from 'src/state/pstake/types';
 import ClaimDrawer from '../../ClaimDrawer';
 import RemoveDrawer from '../../RemoveDrawer';
+import EarnedCalculation from './calculation';
 import { InnerWrapper, Wrapper } from './styleds';
 
 export interface EarnDetailProps {
@@ -23,6 +23,7 @@ const EarnedDetail = ({ stakingInfo, version }: EarnDetailProps) => {
 
   const [isClaimDrawerVisible, setShowClaimDrawer] = useState(false);
   const [isRemoveDrawerVisible, setShowRemoveDrawer] = useState(false);
+  const [totalUSD, setTotalUSD] = useState(0);
   const usdc = USDC[chainId];
 
   const { rewardTokensAmount } = useMinichefPendingRewards(stakingInfo);
@@ -71,21 +72,6 @@ const EarnedDetail = ({ stakingInfo, version }: EarnDetailProps) => {
             {isSuperFarm && (
               <>
                 {(rewardTokensAmount || []).map((reward, index) => {
-                  // TODO: need to fix this
-                  // ---------------------------------------------------------------
-                  // ---------------------------------------------------------------
-                  // let val = 0;
-                  // const tokenMultiplier = rewardTokensMultiplier?.[index];
-                  // const currencyUSDPrice = useUSDCPrice(reward?.token);
-                  // const extraTokenWeeklyRewardRate = stakingInfo?.getExtraTokensWeeklyRewardRate?.(
-                  //   stakingInfo?.rewardRatePerWeek,
-                  //   reward?.token,
-                  //   tokenMultiplier,
-                  // ) as TokenAmount;
-                  // val += Number(currencyUSDPrice?.toFixed()) * Number(extraTokenWeeklyRewardRate?.toSignificant(4));
-                  // console.log(val);
-                  // ---------------------------------------------------------------
-                  // ---------------------------------------------------------------
                   return (
                     <Box key={index}>
                       <Stat
@@ -101,7 +87,32 @@ const EarnedDetail = ({ stakingInfo, version }: EarnDetailProps) => {
               </>
             )}
           </Box>
-
+          {(rewardTokensAmount || []).map((reward, index) => {
+            // TODO:
+            // It would not work if more than 2 tokens
+            return totalUSD !== 0 ? (
+              <Box pt={30} key={rewardTokensAmount.length}>
+                <Text color="text1" fontSize={[12, 10]} fontWeight={400} textAlign={'center'}>
+                  {t('dashboardPage.earned_yourWeeklyIncome', {
+                    coinSymbol: usdc?.symbol,
+                    value: Number(rewardAmountUSDPrice + totalUSD)?.toFixed(6) ?? '-',
+                  })}
+                </Text>
+              </Box>
+            ) : (
+              <EarnedCalculation
+                key={index}
+                setTotalUSD={setTotalUSD}
+                useUSDCPrice={useUSDCPrice}
+                totalUSD={totalUSD}
+                reward={reward}
+                stakingInfo={stakingInfo}
+                index={index}
+              />
+            );
+          })}
+        </InnerWrapper>
+        {totalUSD === 0 && (
           <Box pt={30}>
             <Text color="text1" fontSize={[12, 10]} fontWeight={400} textAlign={'center'}>
               {t('dashboardPage.earned_yourWeeklyIncome', {
@@ -110,7 +121,7 @@ const EarnedDetail = ({ stakingInfo, version }: EarnDetailProps) => {
               })}
             </Text>
           </Box>
-        </InnerWrapper>
+        )}
       </Box>
 
       <Box mt={10}>
