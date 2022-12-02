@@ -2,11 +2,12 @@
 import {
   BRIDGES,
   Bridge,
+  BridgeChain,
   BridgeCurrency,
   Chain,
   CurrencyAmount,
   LIFI as LIFIBridge,
-  // SQUID,
+  SQUID,
   // THORSWAP,
 } from '@pangolindex/sdk';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
@@ -56,6 +57,7 @@ const BridgeCard: React.FC<BridgeCardProps> = (props) => {
     toChain,
     inputCurrency,
     outputCurrency,
+    recipient,
     slippageTolerance,
     getRoutes,
     setSlippageTolerance,
@@ -107,6 +109,7 @@ const BridgeCard: React.FC<BridgeCardProps> = (props) => {
     onCurrencySelection,
     onChainSelection,
     onUserInput,
+    onChangeRecipient,
     onChangeRouteLoaderStatus,
     onClearTransactionData,
   } = useBridgeActionHandlers();
@@ -130,7 +133,7 @@ const BridgeCard: React.FC<BridgeCardProps> = (props) => {
       });
       return data;
     }
-  }, [currencyHook?.[LIFIBridge.id], activeBridges]);
+  }, [currencyHook?.[LIFIBridge.id], currencyHook?.[SQUID.id], activeBridges]);
 
   const inputCurrencyList = useMemo(() => {
     const data = allBridgeCurrencies?.filter((val) => val?.chainId === fromChain?.chain_id?.toString());
@@ -144,7 +147,7 @@ const BridgeCard: React.FC<BridgeCardProps> = (props) => {
 
   const chainList = useMemo(() => {
     if (activeBridges) {
-      let data: Chain[] = [];
+      let data: BridgeChain[] = [];
       activeBridges.forEach((bridge: Option) => {
         data = data
           ?.concat(chainHook[bridge.value])
@@ -156,12 +159,21 @@ const BridgeCard: React.FC<BridgeCardProps> = (props) => {
       }
       return data;
     }
-  }, [activeBridges, chainHook?.[LIFIBridge.id]]);
+  }, [activeBridges, chainHook?.[LIFIBridge.id], chainHook?.[SQUID.id]]);
 
   useEffect(() => {
     if (debouncedAmountValue) {
       onChangeRouteLoaderStatus();
-      getRoutes(debouncedAmountValue, slippageTolerance, fromChain, toChain, account, inputCurrency, outputCurrency);
+      getRoutes(
+        debouncedAmountValue,
+        slippageTolerance,
+        fromChain,
+        toChain,
+        account,
+        inputCurrency,
+        outputCurrency,
+        recipient,
+      );
     }
   }, [debouncedAmountValue, slippageTolerance, inputCurrency, outputCurrency]);
 
@@ -188,6 +200,13 @@ const BridgeCard: React.FC<BridgeCardProps> = (props) => {
       onChainSelection(drawerType, chain);
     },
     [drawerType, onChainSelection],
+  );
+
+  const changeRecipient = useCallback(
+    (recipient: string) => {
+      onChangeRecipient(recipient);
+    },
+    [onChangeRecipient],
   );
 
   return (
@@ -271,6 +290,8 @@ const BridgeCard: React.FC<BridgeCardProps> = (props) => {
           onChangeChainDrawerStatus();
         }}
         title="To"
+        onChangeRecipient={changeRecipient}
+        recipient={recipient}
         inputDisabled={true}
         amount={estimatedAmount}
         amountNet={amountNet}
