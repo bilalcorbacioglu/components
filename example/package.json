@@ -15,7 +15,7 @@
     "@types/react-router-dom": "^5.3.3",
     "@web3-react/core": "6.0.9",
     "@web3-react/injected-connector": "6.0.7",
-    "patch-package": "6.4.7",
+    "patch-package": "6.5.1",
     "react": "17.0.2",
     "react-device-detect": "^2.2.2",
     "react-dom": "17.0.2",
