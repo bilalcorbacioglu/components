@@ -34,7 +34,7 @@
   "license": "ISC",
   "dependencies": {
     "@0xsquid/sdk": "1.7.4",
-    "@coinbase/wallet-sdk": "^3.6.3",
+    "@coinbase/wallet-sdk": "^3.9.0",
     "@ethersproject/abi": "5.6.4",
     "@ethersproject/address": "5.6.1",
     "@ethersproject/bignumber": "5.6.2",
@@ -76,7 +76,7 @@
     "d3": "^7.6.1",
     "dayjs": "^1.10.7",
     "deep-equal": "^2.0.5",
-    "ethers": "^5.5.4",
+    "ethers": "^6.0.0",
     "eventemitter3": "^5.0.0",
     "graphql-request": "^4.2.0",
     "graphql-tag": "^2.11.0",
